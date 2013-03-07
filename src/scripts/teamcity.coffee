@@ -94,8 +94,8 @@ module.exports = (robot) ->
     getBuildTypes msg, (err, msg, buildTypes) ->
       callback msg, execute(buildTypes)
 
-  robot.respond /tc build start (.*)/i, (msg) ->
-    buildName = msg.match[1]
+  robot.respond /teamcity (build|deploy|testflight) (.*)/i, (msg) ->
+    buildName = msg.match[2]
     mapNameToIdForBuildType msg, buildName, (msg, buildType) ->
       if not buildType
         msg.send "Build type #{buildName} was not found"
@@ -113,7 +113,7 @@ module.exports = (robot) ->
 
 
 
-  robot.respond /tc list (projects|buildTypes|builds) ?(.*)?/i, (msg) ->
+  robot.respond /teamcity list (projects|buildTypes|builds) ?(.*)?/i, (msg) ->
     type = msg.match[1]
 
     option = msg.match[2]
