@@ -11,10 +11,10 @@
 #
 # Commands:
 #   hubot show me builds - Show status of currently running builds
-#   hubot tc list projects - Show all available projects
-#   hubot tc list buildTypes - Show all available build types
-#   hubot tc list builds <buildType> - Show the status of the last 5 builds 
-#   hubot tc build start <buildType> - Adds a build to the queue for the specified build type
+#   hubot teamcity list projects - Show all available projects
+#   hubot teamcity list buildTypes - Show all available build types
+#   hubot teamcity list builds <buildType> - Show the status of the last 5 builds 
+#   hubot teamcity (build|deploy|testflight) <buildType> - Adds a build to the queue for the specified build type
 #
 # Author:
 #   Micah Martin
