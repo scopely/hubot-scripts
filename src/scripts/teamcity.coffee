@@ -109,7 +109,7 @@ module.exports = (robot) ->
           if err
             msg.send "Fail! Something went wrong. Couldn't start the build for some reason"
           else
-            msg.send "Dropped a build in the queue for #{buildName}. Run `tc list builds #{buildName}` to check the status"
+            msg.send "Dropped a build in the queue for #{buildName}. Run `teamcity list builds #{buildName}` to check the status"
 
 
 
