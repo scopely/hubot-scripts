@@ -45,6 +45,6 @@ module.exports = (robot) ->
     robot.hear /^benoit/i, (msg) ->
       msg.send "balls"
 
-    robot.hear /love/i, (msg) ->
-      msg.reply "And I love that I have an erection... that doesn't involve homeless people."
+    # robot.hear /love/i, (msg) ->
+    #   msg.reply "And I love that I have an erection... that doesn't involve homeless people."
 
