@@ -13,9 +13,6 @@
 #
 # Author:
 #   maxgoedjen
-#
-# Additional Requirements
-#   unix mail client installed on the system
 
 nodemailer = require("nodemailer");
 
@@ -23,7 +20,7 @@ username = process.env.HUBOT_SCOPELYMAIL_USERNAME
 password = process.env.HUBOT_SCOPELYMAIL_PASSWORD
 
 module.exports = (robot) ->
-	robot.respond /email ([^@.]*)(@scopely.com)? (.*)/i, (res) ->
+	robot.respond /email ([^@^ .]*)(@scopely.com)? (.*)/i, (res) ->
 		transport = nodemailer.createTransport("SMTP", {
 			service: "Gmail",
 			auth: {
