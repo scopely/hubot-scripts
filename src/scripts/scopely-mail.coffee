@@ -39,3 +39,4 @@ module.exports = (robot) ->
 			subject: "Message from #{res.message.user.name} via Hubot",
 			text: res.match[3]
 		})
+		res.send 'Message sent.'
