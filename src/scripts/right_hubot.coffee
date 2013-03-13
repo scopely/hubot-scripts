@@ -15,4 +15,6 @@
 
 module.exports = (robot) ->
   robot.hear /right(,)? hubot/i, (msg) ->
-    msg.send 'Yep.'
+	if msg.message.user.name == 'dataxpress'
+	  msg.send 'No, Tim.'
+	msg.send 'Yep.'
