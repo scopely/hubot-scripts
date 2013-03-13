@@ -59,8 +59,12 @@ module.exports = (robot) ->
          projects = JSON.parse(body).project unless err
          callback err, msg, projects
 
-  getBuildTypes = (msg, callback) ->
-    url = "http://#{hostname}/httpAuth/app/rest/buildTypes"
+  getBuildTypes = (msg, project, callback) ->
+    projectSegment = ''
+    if project?
+      projectSegment = '/projects/name:' + encodeURIComponent project
+    url = "http://#{hostname}/httpAuth/app/rest#{projectSegment}/buildTypes"
+    console.log url
     msg.http(url)
       .headers(getAuthHeader())
       .get() (err, res, body) ->
@@ -68,8 +72,12 @@ module.exports = (robot) ->
          buildTypes = JSON.parse(body).buildType unless err
          callback err, msg, buildTypes
 
-   getBuilds = (msg, id, type, callback) ->
-    url = "http://#{hostname}/httpAuth/app/rest/buildTypes/#{type}:#{escape(id)}/builds"
+  getBuilds = (msg, project, configuration, callback) ->
+    projectSegment = ''
+    if project?
+      projectSegment = "/projects/name:#{encodeURIComponent(project)}"
+
+    url = "http://#{hostname}/httpAuth/app/rest#{projectSegment}/buildTypes/name:#{encodeURIComponent(configuration)}/builds"
     msg.http(url)
       .headers(getAuthHeader())
       .query(locator: ["lookupLimit:5","running:any"].join(","))
@@ -78,10 +86,10 @@ module.exports = (robot) ->
         builds = JSON.parse(body).build unless err
         callback err, msg, builds
 
-  mapNameToIdForBuildType = (msg, name, callback) ->
+  mapNameToIdForBuildType = (msg, project, name, callback) ->
 
     execute = (buildTypes) ->
-      buildType =  _.find buildTypes, (bt) -> return bt.name == name
+      buildType =  _.find buildTypes, (bt) -> return bt.name == name and (not project? or bt.projectName == project)
       if buildType
         return buildType.id
 
@@ -91,12 +99,20 @@ module.exports = (robot) ->
       callback(msg, result)
       return
 
-    getBuildTypes msg, (err, msg, buildTypes) ->
+    getBuildTypes msg, project, (err, msg, buildTypes) ->
       callback msg, execute(buildTypes)
 
   robot.respond /(teamcity )?(build|deploy|testflight) (.*)/i, (msg) ->
-    buildName = msg.match[3]
-    mapNameToIdForBuildType msg, buildName, (msg, buildType) ->
+    configuration = buildName = msg.match[1]
+    project = null
+    buildTypeRE = /(.*?) of (.*)/i
+
+    buildTypeMatches = buildName.match buildTypeRE
+    if buildTypeMatches?
+      configuration = buildTypeMatches[1]
+      project = buildTypeMatches[2]
+
+    mapNameToIdForBuildType msg, project, configuration, (msg, buildType) ->
       if not buildType
         msg.send "Build type #{buildName} was not found"
         return
@@ -112,7 +128,6 @@ module.exports = (robot) ->
             msg.send "Dropped a build in the queue for #{buildName}. Run `teamcity list builds #{buildName}` to check the status"
 
 
-
   robot.respond /teamcity list (projects|buildTypes|builds) ?(.*)?/i, (msg) ->
     type = msg.match[1]
 
@@ -126,14 +141,31 @@ module.exports = (robot) ->
           msg.send message
 
       when "buildTypes"
-        getBuildTypes msg, (err, msg, buildTypes) ->
+        project = null
+        if option?
+          projectRE = /^\s*of (.*)/i
+          matches = option.match(projectRE)
+          if matches? and matches.length > 1
+            project = matches[1]
+          
+        getBuildTypes msg, project, (err, msg, buildTypes) ->
           message = ""
           for buildType in buildTypes
-            message += buildType.name + "\n"
+            message += "#{buildType.name} of #{buildType.projectName}\n"
           msg.send message
 
       when "builds"
-        getBuilds msg, option, "name", (err, msg, builds) ->
+        configuration = option
+        project = null
+
+        buildTypeRE = /^\s*of (.*?) of (.*)/i
+
+        buildTypeMatches = option.match buildTypeRE
+        if buildTypeMatches?
+          configuration = buildTypeMatches[1]
+          project = buildTypeMatches[2]
+   
+        getBuilds msg, project, configuration, (err, msg, builds) ->
           if not builds
             msg.send "Could not find builds for #{option}"
             return
