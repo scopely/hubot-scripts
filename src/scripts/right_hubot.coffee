@@ -14,5 +14,5 @@
 #   maxgoedjen
 
 module.exports = (robot) ->
-  robot.hear /right(, )?hubot/i, (msg) ->
+  robot.hear /right(,)? hubot/i, (msg) ->
     msg.send 'Yep.'
